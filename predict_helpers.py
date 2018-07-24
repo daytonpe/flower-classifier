@@ -1,11 +1,16 @@
 import torch
 import numpy as np
 from PIL import Image
+import torchvision.models as models
 
 
-def load_checkpoint(filepath, model):
+def load_checkpoint(filepath):
     print('\nLoading checkpoint...')
     checkpoint = torch.load(filepath)
+    if checkpoint['input_size'] == 25088:
+        model = models.vgg16(pretrained=True)
+    else:
+        model = models.densenet201(pretrained=True)
     model.input_size = checkpoint['input_size']
     model.output_size = checkpoint['output_size']
     model.epochs = checkpoint['epochs']
@@ -55,12 +60,15 @@ def process_image(image):
     return np_image
 
 
-def predict(image_path, model, topk, cat_to_name):
+def predict(image_path, model, topk, cat_to_name, gpu):
     ''' Predict the class (or classes) of an image using a trained deep learning model.
     '''
-    print('Predicting classification for image...')
+    # print('Predicting classification for image...')
     model.eval()
-    model.cpu()
+    if gpu:
+        model = model.cuda()
+    else:
+        model.cpu()
 
     # convert from these indices to the actual class labels
     idx_to_class = {i: k for k, i in model.mapping.items()}
@@ -69,8 +77,10 @@ def predict(image_path, model, topk, cat_to_name):
     with Image.open(image_path) as image:
         image = process_image(image)
 
-    # Switch it to a float tensor
+        # Switch it to a float tensor
     image = torch.FloatTensor([image])
+    if gpu:
+        image = image.cuda()
 
     # Feed it through the model
     output = model.forward(image)
@@ -82,8 +92,8 @@ def predict(image_path, model, topk, cat_to_name):
     topk_prob = topk_prob.exp()
 
     # Assemble the lists
-    topk_prob_arr = topk_prob.data.numpy()[0]
-    topk_indexes_list = topk_labels.data.numpy()[0].tolist()
+    topk_prob_arr = topk_prob.data.cpu().numpy()[0]
+    topk_indexes_list = topk_labels.data.cpu().numpy()[0].tolist()
     topk_labels_list = [idx_to_class[x] for x in topk_indexes_list]
     topk_class_arr = [cat_to_name[str(x)] for x in topk_labels_list]
 
@@ -91,6 +101,7 @@ def predict(image_path, model, topk, cat_to_name):
     if topk > 1:
         print('topk_prob_arr: ', topk_prob_arr)
         print('topk_class_arr: ', topk_class_arr)
-    print('Done\n')
+        print()
+    # print('Done\n')
 
     return topk_prob_arr, topk_class_arr

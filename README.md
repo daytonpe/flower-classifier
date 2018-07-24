@@ -1,5 +1,4 @@
-# AIPND Final Project
-#### Pat Dayton
+# Flower Classifier -- Udacity AIPND
 
 ## Description
 In this project, we'll train an image classifier to recognize different species of flowers. You can imagine using something like this in a phone app that tells you the name of the flower your camera is looking at. In practice you'd train this classifier, then export it for use in your application. We'll be using this dataset of 102 flower categories
@@ -12,7 +11,7 @@ The **train.py** file allows you to train a neural network on a dataset. Basic u
 
 A data directory must be supplied and it must have three subdirectories `test`, `valid`, `train` housing your pictures.
 
-#### Optional Tags
+## Optional Tags
 
 ```--gpu-off```
 
@@ -229,4 +228,53 @@ Accuracy test time: 0m 17s
 
 Saving checkpoint...
 Saved!
+```
+---
+
+#### Example Output - Predict
+
+```
+python predict.py flowers/ddl.jpg checkpoint.pth --topk 5
+
+GPU?  True
+
+Loading checkpoint...
+Done
+
+
+Loaded checkpoint from  checkpoint.pth
+
+topk_prob_arr:  [  9.70751166e-01   2.91926507e-02   4.20815559e-05   6.94843493e-06   5.63376852e-06]
+topk_class_arr:  ['common dandelion', "colt's foot", 'english marigold', 'marigold', 'buttercup']
+
+Prediction: common dandelion with 97.1% probability.
+```
+```
+python predict.py flowers/ddl.jpg checkpoint.pth --topk 5 --gpu-off
+
+GPU?  False
+
+Loading checkpoint...
+Done
+
+
+Loaded checkpoint from  checkpoint.pth
+
+topk_prob_arr:  [  9.70751584e-01   2.91927140e-02   4.20815559e-05   6.94841492e-06   5.63376352e-06]
+topk_class_arr:  ['common dandelion', "colt's foot", 'english marigold', 'marigold', 'buttercup']
+
+Prediction: common dandelion with 97.1% probability.
+```
+```
+python predict.py flowers/ddl.jpg checkpoint.pth
+
+GPU?  True
+
+Loading checkpoint...
+Done
+
+
+Loaded checkpoint from  checkpoint.pth
+
+Prediction: common dandelion with 97.1% probability.
 ```

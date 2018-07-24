@@ -169,5 +169,5 @@ checkpoint = {'input_size': input_size,
               'state_dict': model.state_dict()}
 
 print('\nSaving checkpoint...')
-torch.save(checkpoint, 'checkpoint1.pth')
+torch.save(checkpoint, 'checkpoint.pth')
 print('Saved!\n')

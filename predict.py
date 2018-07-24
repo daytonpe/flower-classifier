@@ -1,6 +1,5 @@
 import argparse
 import json
-import torchvision.models as models
 from predict_helpers import load_checkpoint, predict
 
 # Basic Usage: python predict.py /path/to/image checkpoint
@@ -27,9 +26,11 @@ parser.add_argument(
     '--gpu-off',
     dest='gpu',
     default=True,
-    action='store_true',
+    action='store_false',
     help='enable gpu mode')
 args = parser.parse_args()
+
+print('\nGPU? ', args.gpu)
 
 # add .pth if not present
 if args.checkpoint[-4:] != '.pth':
@@ -39,20 +40,18 @@ if args.checkpoint[-4:] != '.pth':
 with open(args.cat_to_name, 'r') as f:
     cat_to_name = json.load(f)
 
-
-# Load the pre-trained
-model = models.densenet201(pretrained=True)
+model = load_checkpoint(args.checkpoint)
 
 # Freeze parameters so we don't backprop through them
 for param in model.parameters():
     param.requires_grad = False
 
-model = load_checkpoint(args.checkpoint, model)
 print('\nLoaded checkpoint from ', args.checkpoint, '\n')
 
-prob_arr, class_arr = predict(args.img_path, model, args.topk, cat_to_name)
+prob_arr, class_arr = predict(args.img_path, model, args.topk, cat_to_name, args.gpu)
 
 prediction = class_arr[0]
 probability = round(prob_arr[0]*100, 1)
 
 print('Prediction: {} with {}% probability.'.format(prediction, probability))
+print('\n')
