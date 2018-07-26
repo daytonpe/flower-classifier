@@ -112,56 +112,48 @@ def do_deep_learning(
         t_total // 60, t_total % 60))
 
 
-def build_classifier(model, model_type, hidden_layers, dropout):
+def build_classifier(model, arch, hidden_units, dropout):
     # build start layer for models based on model model_type
-    if model_type == 'VGG':
-
-        # create a linear spaced array of nodes for hidden layers
-        node_list = np.linspace(1920, 102, hidden_layers+2).astype(int).tolist()
-
+    print('arch: ', arch)
+    node_list = list(map(int, hidden_units.split(','))) + [102]
+    if arch == 'vgg':
         # configure our layers
         first_layer = [
-            nn.Linear(25088, node_list[1]),
+            nn.Linear(25088, node_list[0]),
             nn.Dropout(p=dropout),
-            nn.ReLU()
-            ]
+            nn.ReLU()]
 
         middle_layers = []
-        for idx, val in enumerate(node_list[1:-2]):
+        for idx, val in enumerate(node_list[0:-2]):
             middle_layers.append(nn.Linear(node_list[idx+1], node_list[idx+2]))
             middle_layers.append(nn.Dropout(p=dropout))
             middle_layers.append(nn.ReLU())
 
         last_layer = [
             nn.Linear(node_list[-2], 102),
-            nn.LogSoftmax(dim=1)
-            ]
+            nn.LogSoftmax(dim=1)]
 
         first_layer = first_layer+middle_layers+last_layer
         layers = nn.ModuleList(first_layer)
         return nn.Sequential(*layers)
 
     else:
-        # create a linear spaced array of nodes for hidden layers
-        node_list = np.linspace(1920, 102, hidden_layers+2).astype(int).tolist()
 
         # configure our layers
         first_layer = [
-            nn.Linear(1920, node_list[1]),
+            nn.Linear(1920, node_list[0]),
             nn.Dropout(p=dropout),
-            nn.ReLU()
-            ]
+            nn.ReLU()]
 
         middle_layers = []
-        for idx, val in enumerate(node_list[1:-2]):
+        for idx, val in enumerate(node_list[0:-2]):
             middle_layers.append(nn.Linear(node_list[idx+1], node_list[idx+2]))
             middle_layers.append(nn.Dropout(p=dropout))
             middle_layers.append(nn.ReLU())
 
         last_layer = [
             nn.Linear(node_list[-2], 102),
-            nn.LogSoftmax(dim=1)
-            ]
+            nn.LogSoftmax(dim=1)]
 
         first_layer = first_layer+middle_layers+last_layer
         layers = nn.ModuleList(first_layer)

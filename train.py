@@ -48,12 +48,11 @@ parser.add_argument(
     type=int,
     help='define number of training epochs')
 parser.add_argument(
-    '--hidden_layers',
-    dest='hidden_layers',
-    default=3,
-    action='store',
-    type=int,
-    help='define number of hidden layers')
+    '--hidden_units',
+    type=str,
+    default="600",
+    help='list of hidden units for the neural net'
+    )
 parser.add_argument(
     '--dropout',
     dest='dropout',
@@ -99,22 +98,15 @@ image_datasets['valid'] = torchvision.datasets.ImageFolder(valid_dir, transform=
 
 
 # Using the image datasets and the trainforms, define the dataloaders
-dataloaders = {}
-dataloaders['trainloader'] = torch.utils.data.DataLoader(
-    image_datasets['train'],
-    batch_size=64,
-    shuffle=True)
-dataloaders['testloader'] = torch.utils.data.DataLoader(image_datasets['test'], batch_size=64)
-dataloaders['validloader'] = torch.utils.data.DataLoader(image_datasets['valid'], batch_size=64)
-
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=64,
+                                              shuffle=True)
+               for x in ['train', 'valid', 'test']}
 # Load modelbased on args
 if args.arch.upper() == "DENSENET":
     print('\nTraining with Densenet201\n')
     model = models.densenet201(pretrained=True)
 
-
 elif args.arch.upper() == "VGG":
-    args.arch = "VGG"
     print('\nTraining with Vgg16\n')
     model = models.vgg16(pretrained=True)
 
@@ -126,7 +118,7 @@ else:
 for param in model.parameters():
     param.requires_grad = False
 
-model.classifier = build_classifier(model, args.arch.upper(), args.hidden_layers, args.dropout)
+model.classifier = build_classifier(model, args.arch, args.hidden_units, args.dropout)
 
 # Train the classifier layers using backprop using the pre-trained network to get the features
 criterion = nn.NLLLoss()
@@ -137,8 +129,8 @@ device = torch.device("cuda:0" if (torch.cuda.is_available() and args.gpu) else 
 
 do_deep_learning(
     model,
-    dataloaders['trainloader'],
-    dataloaders['validloader'],
+    dataloaders['train'],
+    dataloaders['valid'],
     args.epochs,
     25,
     criterion,
@@ -152,15 +144,16 @@ else:
     model.to('cpu')
 
 # print('\nChecking accuracy with training data...')
-# check_accuracy_on_test(dataloaders['trainloader'], model, args.gpu)
+# check_accuracy_on_test(dataloaders['train'], model, args.gpu)
 
 # CHECK ACCURACY ON VALIDATION SET
 print('\nChecking accuracy with test data...')
-check_accuracy_on_test(dataloaders['testloader'], model, args.gpu)
+check_accuracy_on_test(dataloaders['test'], model, args.gpu)
 
 # SAVE TO CHECKPOINT
 input_size = 1920 if args.arch.upper() == 'DENSENET' else 25088
-checkpoint = {'input_size': input_size,
+checkpoint = {'arch': args.arch.upper(),
+              'input_size': input_size,
               'output_size': 102,
               'epochs': args.epochs,
               'classifier': model.classifier,

@@ -33,11 +33,11 @@ Define learning rate.
 
 Define number of epochs.
 
-```--hidden_layers```
+```--hidden_units```
 
-Define number of hidden layers.
+Define number of hidden units. Ex. `--hidden_units 500,300,200`
 
-```dropout```
+```--dropout```
 
 Define dropout rate.
 
@@ -119,12 +119,12 @@ Prediction: common dandelion with 97.1% probability.
 ```
 ---
 
-#### Example Output - Train
+## Example Output - Train
 
-## Densenet201
+#### Densenet201
 
 ```
-root@c92c6fb12fa6:/home/workspace/aipnd-project# python train.py flowers --epochs 10 --hidden_layers 2 --arch densenet
+python train.py flowers --epochs 10 --hidden_units 500,400 --arch densenet
 
 GPU?  True
 
@@ -200,9 +200,10 @@ Accuracy test time: 0m 17s
 Saving checkpoint...
 Saved!
 ```
-## VGG16
+#### VGG16
+
 ```
-root@c92c6fb12fa6:/home/workspace/aipnd-project# python train.py flowers --epochs 10 --hidden_layers 2 --arch vgg
+python train.py flowers --epochs 10 --hidden_units 500,400 --arch vgg
 
 GPU?  True
 

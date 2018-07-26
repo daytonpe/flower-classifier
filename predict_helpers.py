@@ -7,17 +7,13 @@ import torchvision.models as models
 def load_checkpoint(filepath):
     print('\nLoading checkpoint...')
     checkpoint = torch.load(filepath)
-    if checkpoint['input_size'] == 25088:
+    if checkpoint['arch'] == 'VGG':
         model = models.vgg16(pretrained=True)
     else:
         model = models.densenet201(pretrained=True)
-    model.input_size = checkpoint['input_size']
-    model.output_size = checkpoint['output_size']
-    model.epochs = checkpoint['epochs']
     model.classifier = checkpoint['classifier']
     model.optimizer_state = checkpoint['optimizer_state']
     model.mapping = checkpoint['mapping']
-    model.state_dict = checkpoint['state_dict']
     model.load_state_dict(checkpoint['state_dict'])
     print('Done\n')
     return model
